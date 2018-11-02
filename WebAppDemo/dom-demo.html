@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <link href="Content/main.css" rel="stylesheet" />
+</head>
+<body class="dom-demo">
+
+    <main class="container">
+
+        <div id="tasks">
+            <div class="row">
+                <div class="col-md-5">
+                    <input type="text" class="form-control" id="name" placeholder="نام" />
+                </div>
+                <div class="col-md-5">
+                    <input type="text" class="form-control" id="task-due-date" placeholder="نام خانوادگی " />
+
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-success btn-sm btn-block" id="save-btn">
+                        <span class="fa fa-save"></span>
+                        ذخیره
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <table class="table table-hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>نام </th>
+                            <th>نام خانوادگی </th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="tasks-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script src="Scripts/jquery-2.2.4.js"></script>
+    <script src="Scripts/bootstrap-rtl.js"></script>
+    <script>
+
+
+
+        $(function () {
+             $('#save-btn').on('click', sendData);
+            function sendData() {
+                $('#save-btn').off('click');
+                $('#save-btn').addClass('disabled');
+
+                let firstName = $('#name').val();
+                let lastName = $('#task-due-date').val();
+
+                $.ajax({
+                    method: "POST",
+                    url: "/AjaxAction.aspx",
+                    data: { taskname: firstName, family: lastName }
+                })
+                    .done(function (data) {
+                        $('#name').parent().parent()
+                            .prepend(
+                                $('<div id="response-alert">')
+                                    .addClass('alert alert-success alert-dismissable')
+                                    .text(data)
+                                    .append($('<a href="#" class="close" data-dismiss="alert"><span class="fa fa-close"></span></a>'))
+                            );
+                    })
+                    .fail(function () {
+                        $('#name').parent().parent()
+                            .prepend(
+                                $('<div id="response-alert">').addClass('alert alert-danger').text('خطا در درج اطلاعات')
+                            );
+                    })
+                    .always(function () {
+                        $('#save-btn').on('click', sendData);
+                        $('#save-btn').removeClass('disabled');
+
+                        setTimeout(function () {
+                            $('#response-alert').remove();
+                            //$('#response-alert').slideUp(3000);
+
+                        }, 2000);
+                    });
+
+                $('#name').val('');
+                $('#task-due-date').val('');
+
+            }
+           
+
+            document.getElementById('save-btn').addEventListener('click', () => {
+                let task_name = document.getElementById('name').value;
+                let task_due_date = document.getElementById('task-due-date').value;
+                let table_row = document.createElement('tr');
+                let table_task_col = document.createElement('td');
+                let table_date_col = document.createElement('td');
+                let table_last_col = document.createElement('td');
+                table_task_col.innerHTML = task_name;
+                table_date_col.innerHTML = task_due_date;
+                let done_btn = document.createElement('button');
+                done_btn.setAttribute('class', 'btn btn-primary btn-sm');
+                done_btn.innerHTML = '<span class="glyphicon glyphicon-ok"></span>';
+                done_btn.setAttribute('onclick', 'doneTask(this)');
+                table_last_col.appendChild(done_btn);
+                table_row.appendChild(table_task_col);
+                table_row.appendChild(table_date_col);
+                table_row.appendChild(table_last_col);
+                let table_body = document.getElementById('tasks-table-body');
+                table_body.appendChild(table_row);
+            });
+
+
+        })();
+    </script>
+</body>
+</html>
